@@ -1,4 +1,4 @@
-package ru.project.students.dto.student;
+package ru.project.students.dto;
 
 import lombok.Data;
 
@@ -8,5 +8,5 @@ public class StudentPagination {
     private Integer number;
     private Boolean random;
     private String sort;
-    private Boolean orderDesc;
+    private Boolean sortDesc;
 }

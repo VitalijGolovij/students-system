@@ -1,19 +1,18 @@
-package ru.project.students.dto.student.field;
+package ru.project.students.model;
 
 import lombok.Data;
 
 import javax.persistence.Embeddable;
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
+import javax.persistence.Embedded;
 
-@Data
 @Embeddable
+@Data
 public class Contact {
-    @Valid
+    @Embedded
     private Phone fPhone;
-    @Valid
+    @Embedded
     private Telegram fTelegram;
-    @Valid
+    @Embedded
     private Email fEmail;
 
     private Boolean hasContact;

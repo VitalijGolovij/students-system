@@ -1,16 +1,18 @@
-package ru.project.students.dto.student.field;
+package ru.project.students.model;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Pattern;
+import javax.persistence.*;
 
-@Data
+@Getter
+@Embeddable
 @NoArgsConstructor
 public class Email {
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@(.+)$", message = "Invalid email format")
+    @Column(name = "email")
     private String email;
-
+    @Transient
     private Boolean hasEmail;
 
     public Email(String email){
@@ -22,5 +24,14 @@ public class Email {
     public void setEmail(String email) {
         this.email = email;
         this.hasEmail = true;
+    }
+
+    @PostLoad
+    public void initHasEmail(){
+        if (email != null){
+            this.hasEmail = true;
+        } else {
+            this.hasEmail = false;
+        }
     }
 }
