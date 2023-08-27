@@ -1,10 +1,12 @@
 package ru.project.students.model;
 
 import lombok.Data;
+import ru.project.students.model.field.Contact;
+import ru.project.students.model.field.Git;
+import ru.project.students.model.field.PersonalData;
 
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "students")
@@ -15,30 +17,12 @@ public class Student {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "first_name")
-    private String firstname;
-    @Column(name = "last_name")
-    private String lastname;
-    @Column(name = "patronymic")
-    private String patronymic;
-    @Column(name = "email")
-    private String email;
-    @Column(name = "phone")
-    private String phone;
-    @Column(name = "telegram")
-    private String telegram;
-    @Column(name = "git")
-    private String git;
-    @Column(name = "autoexam")
-    private String autoexam;
-    @Column(name = "group_id")
-    private Integer groupId;
+    @Embedded @Valid
+    private Contact fContact;
+    @Embedded @Valid
+    private Git fGit;
+    @Embedded @Valid
+    private PersonalData personalData;
 
-    public Boolean hasContact(){
-        return (telegram != null && phone != null && email != null);
-    }
-
-    public Boolean hasGit(){
-        return (git != null);
-    }
+    //PostLoad
 }

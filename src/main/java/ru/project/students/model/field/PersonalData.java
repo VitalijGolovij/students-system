@@ -1,4 +1,4 @@
-package ru.project.students.dto.student.field;
+package ru.project.students.model.field;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,12 +12,15 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 public class PersonalData {
     @Pattern(regexp = "^[А-ЯЁа-яё]+$", message = "Invalid firstname format")
+    @Column(name = "first_name")
     private String firstname;
 
     @Pattern(regexp = "^[А-ЯЁа-яё]+$", message = "Invalid lastname format")
+    @Column(name = "last_name")
     private String lastname;
 
     @Pattern(regexp = "^[А-ЯЁа-яё]+$", message = "Invalid patronymic format")
+    @Column(name = "patronymic")
     private String patronymic;
 
     private String lastnameInitials;

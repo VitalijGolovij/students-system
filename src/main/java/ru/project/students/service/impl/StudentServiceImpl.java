@@ -6,15 +6,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
-import ru.project.students.dto.student.StudentDto;
+import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.dto.student.StudentPagination;
 import ru.project.students.exception.InvalidDataException;
 import ru.project.students.model.Student;
@@ -28,13 +28,17 @@ import java.util.*;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
-    private final StudentConvertor studentConvertor;
+    private final SpecificationService specificationService;
+    private final PageService pageService;
 
     @Override
     public List<Student> getStudentList(GetStudentListRequest getStudentListRequest) {
         StudentPagination pagination = getStudentListRequest.getStudentPagination();
-        Pageable pageable = setPageable(pagination);
-        return studentRepository.findAll(pageable).getContent();
+        StudentSearch studentSearch = getStudentListRequest.getFilter();
+
+        Specification<Student> spec = specificationService.getSeaechStudentSpecification(studentSearch);
+        Pageable pageable = pageService.getPageableSort(pagination);
+        return studentRepository.findAll(spec, pageable).getContent();
     }
 
     @Transactional
@@ -45,9 +49,7 @@ public class StudentServiceImpl implements StudentService {
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student student = studentConvertor.toStudent(createStudentRequest.getStudent());
-        studentRepository.save(student);
-        return student;
+        return null;
     }
 
     @Override
@@ -57,20 +59,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
-    public Student putStudent(Long id, StudentDto studentDto,
+    public Student putStudent(Long id, Student student,
                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()){
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student student = getStudent(id);
-        Student updatedStudent = studentConvertor.toStudent(studentDto);
-
-        modelMapper.map(updatedStudent, student);
-        student.setId(id);
-
-        studentRepository.save(student);
-        return student;
+        return null;
     }
 
     @Override

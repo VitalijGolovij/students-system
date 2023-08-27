@@ -1,4 +1,4 @@
-package ru.project.students.dto.student.field;
+package ru.project.students.model.field;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +13,7 @@ import javax.validation.constraints.Pattern;
 public class Git {
     private Boolean hasGit;
     @Pattern(regexp = "^https:\\/\\/\\S+\\/\\S+$", message = "Invalid git format")
+    @Column(name = "git")
     private String git;
 
     public void setGit(String git) {

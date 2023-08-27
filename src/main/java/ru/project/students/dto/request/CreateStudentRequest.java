@@ -2,7 +2,7 @@ package ru.project.students.dto.request;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.project.students.dto.student.StudentDto;
+import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.model.Student;
 
 import javax.persistence.Embedded;
@@ -13,5 +13,5 @@ import javax.validation.Valid;
 @Data
 public class CreateStudentRequest extends RequestBody{
     @Embedded @Valid
-    private StudentDto student;
+    private Student student;
 }

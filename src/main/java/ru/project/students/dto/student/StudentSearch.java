@@ -5,9 +5,16 @@ import ru.project.students.model.field.Contact;
 import ru.project.students.model.field.Git;
 import ru.project.students.model.field.PersonalData;
 
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+
+@Embeddable
 @Data
-public class UpdatedStudent {
-    private Contact contact;
-    private Git git;
+public class StudentSearch {
+    @Embedded
+    private Contact fContact;
+    @Embedded
+    private Git fGit;
+    @Embedded
     private PersonalData personalData;
 }

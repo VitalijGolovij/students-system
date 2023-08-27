@@ -2,9 +2,8 @@ package ru.project.students.dto.request;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.project.students.dto.student.StudentDto;
+import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.dto.student.StudentPagination;
-import ru.project.students.model.Student;
 
 import javax.validation.Valid;
 
@@ -12,7 +11,7 @@ import javax.validation.Valid;
 @Data
 public class GetStudentListRequest extends RequestBody{
 
-    private StudentDto filter;
+    private StudentSearch filter;
     @Valid
     private StudentPagination studentPagination;
 }
