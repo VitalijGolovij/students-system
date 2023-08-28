@@ -1,7 +1,6 @@
 package ru.project.students.dto.response;
 
 import lombok.Getter;
-import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.model.Student;
 
 import java.util.List;

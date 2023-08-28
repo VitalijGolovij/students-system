@@ -1,7 +1,6 @@
 package ru.project.students.dto.response;
 
 import lombok.Getter;
-import ru.project.students.dto.request.ExceptionResponse;
 
 import java.util.List;
 import java.util.Map;

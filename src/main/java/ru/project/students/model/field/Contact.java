@@ -4,6 +4,8 @@ import lombok.Data;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 import javax.validation.Valid;
 
 @Data
@@ -19,6 +21,7 @@ public class Contact {
     @Embedded
     private Email fEmail;
 
+    @Transient
     private Boolean hasContact;
 
     public void setFPhone(Phone fPhone){
@@ -34,5 +37,24 @@ public class Contact {
     public void setFTelegram(Telegram fTelegram) {
         this.fTelegram = fTelegram;
         this.hasContact = true;
+    }
+
+    @PostLoad
+    public void postInit(){
+        if (fPhone != null || fEmail != null || fTelegram != null){
+            this.hasContact = true;
+        } else {
+            this.hasContact = false;
+        }
+
+        if (fPhone != null){
+            fPhone.setHasPhone(true);
+        }
+        if (fEmail != null){
+            fEmail.setHasEmail(true);
+        }
+        if (fTelegram != null){
+            fTelegram.setHasTelegram(true);
+        }
     }
 }

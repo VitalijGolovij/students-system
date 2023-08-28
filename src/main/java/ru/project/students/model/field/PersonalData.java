@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.PostLoad;
+import javax.persistence.Transient;
 import javax.validation.constraints.Pattern;
 
 @Data
@@ -23,6 +25,7 @@ public class PersonalData {
     @Column(name = "patronymic")
     private String patronymic;
 
+    @Transient
     private String lastnameInitials;
 
     public PersonalData(String firstname, String lastname, String patronymic){
@@ -30,6 +33,11 @@ public class PersonalData {
         this.lastname = lastname;
         this.patronymic = patronymic;
 
+        this.lastnameInitials = lastname + " " + firstname.charAt(0) + " " + patronymic.charAt(0);
+    }
+
+    @PostLoad
+    public void postInit(){
         this.lastnameInitials = lastname + " " + firstname.charAt(0) + " " + patronymic.charAt(0);
     }
 }

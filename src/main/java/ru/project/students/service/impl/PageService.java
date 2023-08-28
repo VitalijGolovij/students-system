@@ -9,13 +9,8 @@ import ru.project.students.dto.student.StudentPagination;
 @Service
 public class PageService {
     public Pageable getPageableSort(StudentPagination pagination){
-        if (pagination.getSort() != null){
-            Sort sort = getSort(pagination);
-
-            return PageRequest.of(pagination.getNumber(), pagination.getCount(), sort);
-        } else {
-            return PageRequest.of(pagination.getNumber(), pagination.getCount());
-        }
+        Sort sort = getSort(pagination);
+        return PageRequest.of(pagination.getNumber(), pagination.getCount(), sort);
     }
     public Pageable getPageableRandom(StudentPagination pagination){
         return PageRequest.of(0, pagination.getCount(), Sort.by("function('RAND')"));
@@ -30,23 +25,24 @@ public class PageService {
     }
 
     private Sort getSort(StudentPagination pagination){
-        String fieldName = pagination.getSort();
-        Boolean sortDesc = pagination.getOrderDesc();
+        String fieldName = pagination.getSort() != null ?
+                pagination.getSort() : "personalData.lastname";
+        boolean sortDesc = pagination.getOrderDesc() != null ?
+                pagination.getOrderDesc() : false;
 
         Sort sort = null;
 
-        //TODO рефакторинг
         if (fieldName.equals("contact")){
-            sort = Sort.by("phone")
-                    .and(Sort.by("telegram"))
-                    .and(Sort.by("email"));
-        } else if (fieldName.equals("lastnameInitials")){
-            sort = Sort.by("lastname", "firstname");
+            sort = Sort.by("fContact.fPhone.phone")
+                    .and(Sort.by("fContact.fTelegram.telegram"))
+                    .and(Sort.by("fContact.fEmail.email"));
+        } else if (fieldName.equals("personalData.lastnameInitials")){
+            sort = Sort.by("personalData.lastname", "personalData.firstname");
         } else {
             sort = Sort.by(fieldName);
         }
 
-        if (sortDesc == null || !sortDesc ){
+        if (!sortDesc){
             return sort.ascending();
         } else {
             return sort.descending();

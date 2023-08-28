@@ -3,13 +3,11 @@ package ru.project.students.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.model.Student;
-import ru.project.students.model.field.Contact;
-import ru.project.students.model.field.Git;
-import ru.project.students.model.field.PersonalData;
+import ru.project.students.model.field.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class SpecificationService {
-    public Specification<Student> getSearchStudentSpecification(StudentSearch student){
+    public Specification<Student> getSearchStudentSpecification(ru.project.students.dto.student.StudentDto student){
         return ((root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -29,11 +27,17 @@ public class SpecificationService {
                 processContact(predicates, student.getFContact(), root, builder);
             }
             if (student.getFGit() != null) {
-                processGit(predicates, student.getFGit(), root, builder);
+                processGit(predicates, student.getFGit(), root.get("fGit"), builder);
             }
 
             return builder.and(predicates.toArray(new Predicate[0]));
         });
+    }
+
+    public Specification<Student> emptySpec(){
+        return (root, query, criteriaBuilder) -> {
+            return criteriaBuilder.conjunction();
+        };
     }
 
     private void processPersonalData(List<Predicate> predicates, PersonalData personalData,
@@ -60,46 +64,113 @@ public class SpecificationService {
                 );
                 predicates.add(like);
             }
+            if(personalData.getLastnameInitials() != null){
+                String lastname = personalData.getLastnameInitials().split(" ")[0];
+
+                Predicate like = builder.like(
+                        root.get("personalData").get("lastname"),
+                        "%"+lastname+"%"
+                );
+                predicates.add(like);
+            }
         }
     }
     private void processContact(List<Predicate> predicates, Contact contact,
                                 Root<Student> root, CriteriaBuilder builder){
+        if (contact.getHasContact() != null && contact.getHasContact()){
+            Predicate exist = builder.or(
+                    builder.isNotNull(root.get("fContact").get("fPhone").get("phone")),
+                    builder.isNotNull(root.get("fContact").get("fEmail").get("email")),
+                    builder.isNotNull(root.get("fContact").get("fTelegram").get("telegram"))
+                    );
+            predicates.add(exist);
+        }
         if (contact.getFPhone() != null){
-            String phone = contact.getFPhone().getPhone();
-
-            Predicate like = builder.like(
-                    root.get("fContact").get("fPhone").get("phone"),
-                    "%"+phone+"%"
-            );
-            predicates.add(like);
+            processPhone(predicates, contact.getFPhone(),
+                    root.get("fContact").get("fPhone"), builder);
         }
         if (contact.getFEmail() != null){
-            String email = contact.getFEmail().getEmail();
-
-            Predicate like = builder.like(
-                    root.get("fContact").get("fEmail").get("email"),
-                    "%"+email+"%"
-            );
-            predicates.add(like);
+            processEmail(predicates, contact.getFEmail(),
+                    root.get("fContact").get("fEmail"), builder);
         }
         if (contact.getFTelegram() != null){
-            String telegram = contact.getFTelegram().getTelegram();
-
-            Predicate like = builder.like(
-                    root.get("fContact").get("fTelegram").get("telegram"),
-                    "%"+telegram+"%"
-            );
-            predicates.add(like);
+            processEmail(predicates, contact.getFTelegram(),
+                    root.get("fContact").get("fTelegram"), builder);
         }
     }
     private void processGit(List<Predicate> predicates, Git git,
-                            Root<Student> root, CriteriaBuilder builder){
-        String gitStr = git.getGit();
+                            Path<Git> root, CriteriaBuilder builder){
+        String gitVal = git.getGit() != null ? git.getGit() : "";
+        boolean hasGit = git.getHasGit() != null ? git.getHasGit() : true;
 
-        Predicate like = builder.like(
-                root.get("fGit").get("git"),
-                "%"+gitStr+"%"
-        );
-        predicates.add(like);
+        if (hasGit){
+            Predicate exist = builder.isNotNull(root.get("git"));
+            predicates.add(exist);
+
+            Predicate like = builder.like(
+                    root.get("git"), "%"+gitVal+"%"
+            );
+            predicates.add(like);
+        } else {
+            Predicate notExist = builder.isNull(root);
+            predicates.add(notExist);
+        }
+    }
+
+    private void processPhone(List<Predicate> predicates, Phone phone,
+                              Path<Phone> root, CriteriaBuilder builder){
+        String phoneVal = phone.getPhone() != null ? phone.getPhone() : "";
+        boolean hasPhone = phone.getHasPhone() != null ? phone.getHasPhone() : true;
+
+        if (hasPhone){
+            Predicate exist = builder.isNotNull(root.get("phone"));
+            predicates.add(exist);
+
+            Predicate like = builder.like(
+                    root.get("phone"), "%"+phoneVal+"%"
+            );
+            predicates.add(like);
+        } else {
+            Predicate notExist = builder.isNull(root);
+            predicates.add(notExist);
+        }
+    }
+
+    private void processEmail(List<Predicate> predicates, Email email,
+                              Path<Email> root, CriteriaBuilder builder){
+        String emailVal = email.getEmail() != null ? email.getEmail() : "";
+        boolean hasEmail = email.getHasEmail() != null ? email.getHasEmail() : true;
+
+        if (hasEmail){
+            Predicate exist = builder.isNotNull(root.get("email"));
+            predicates.add(exist);
+
+            Predicate like = builder.like(
+                    root.get("email"), "%"+emailVal+"%"
+            );
+            predicates.add(like);
+        } else {
+            Predicate notExist = builder.isNull(root);
+            predicates.add(notExist);
+        }
+    }
+
+    private void processEmail(List<Predicate> predicates, Telegram telegram,
+                              Path<Telegram> root, CriteriaBuilder builder){
+        String telegramVal = telegram.getTelegram() != null ? telegram.getTelegram() : "";
+        boolean hasTelegram = telegram.getHasTelegram() != null ? telegram.getHasTelegram() : true;
+
+        if (hasTelegram){
+            Predicate exist = builder.isNotNull(root.get("telegram"));
+            predicates.add(exist);
+
+            Predicate like = builder.like(
+                    root.get("telegram"), "%"+telegramVal+"%"
+            );
+            predicates.add(like);
+        } else {
+            Predicate notExist = builder.isNull(root);
+            predicates.add(notExist);
+        }
     }
 }

@@ -10,7 +10,7 @@ import javax.persistence.Embedded;
 
 @Embeddable
 @Data
-public class StudentSearch {
+public class StudentDto {
     @Embedded
     private Contact fContact;
     @Embedded
