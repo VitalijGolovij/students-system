@@ -3,9 +3,7 @@ package ru.project.students.service.impl;
 import lombok.RequiredArgsConstructor;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +17,7 @@ import ru.project.students.dto.student.StudentPagination;
 import ru.project.students.exception.InvalidDataException;
 import ru.project.students.model.Student;
 import ru.project.students.repository.StudentRepository;
+import ru.project.students.service.StudentFilter;
 import ru.project.students.service.StudentService;
 import java.util.*;
 
@@ -30,15 +29,21 @@ public class StudentServiceImpl implements StudentService {
     private final ModelMapper modelMapper;
     private final SpecificationService specificationService;
     private final PageService pageService;
+    private final StudentFilter studentFilter;
 
     @Override
     public List<Student> getStudentList(GetStudentListRequest getStudentListRequest) {
+        Student filter = getStudentListRequest.getFilter();
+        Student studentFilterExample = filter; // перевод из DTO
         StudentPagination pagination = getStudentListRequest.getStudentPagination();
-        StudentSearch studentSearch = getStudentListRequest.getFilter();
 
-        Specification<Student> spec = specificationService.getSeaechStudentSpecification(studentSearch);
-        Pageable pageable = pageService.getPageableSort(pagination);
-        return studentRepository.findAll(spec, pageable).getContent();
+        Example<Student> example = (filter != null) ?
+                studentFilter.getStudentExample(studentFilterExample) : studentFilter.getEmptyExample();
+
+        Pageable pageable = (pagination != null) ?
+                pageService.getPageable(pagination) : Pageable.unpaged();
+
+        return studentRepository.findAll(example, pageable).getContent();
     }
 
     @Transactional
@@ -85,22 +90,5 @@ public class StudentServiceImpl implements StudentService {
                     "message", Objects.requireNonNull(error.getDefaultMessage())));
         }
         return  errorList;
-    }
-
-    private Pageable setPageable(StudentPagination pagination){
-        if (pagination.getRandom() == null || !pagination.getRandom()){
-
-            if (pagination.getSort() != null){
-                Sort sort = Sort.by(
-                        pagination.getOrderDesc() ?
-                        Sort.Order.desc(pagination.getSort()) : Sort.Order.asc(pagination.getSort())
-                );
-                return PageRequest.of(pagination.getNumber(), pagination.getCount(), sort);
-            } else {
-                return PageRequest.of(pagination.getNumber(), pagination.getCount());
-            }
-        } else {
-            return PageRequest.of(0, pagination.getCount(), Sort.by("function('RAND')"));
-        }
     }
 }

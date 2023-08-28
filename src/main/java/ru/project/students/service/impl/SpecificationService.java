@@ -18,18 +18,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class SpecificationService {
-    public Specification<Student> getSeaechStudentSpecification(StudentSearch studentSearch){
+    public Specification<Student> getSearchStudentSpecification(StudentSearch student){
         return ((root, query, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (studentSearch.getPersonalData() != null) {
-                processPersonalData(predicates, studentSearch.getPersonalData(), root, builder);
+            if (student.getPersonalData() != null) {
+                processPersonalData(predicates, student.getPersonalData(), root, builder);
             }
-            if (studentSearch.getFContact() != null) {
-                processContact(predicates, studentSearch.getFContact(), root, builder);
+            if (student.getFContact() != null) {
+                processContact(predicates, student.getFContact(), root, builder);
             }
-            if (studentSearch.getFGit() != null) {
-                processGit(predicates, studentSearch.getFGit(), root, builder);
+            if (student.getFGit() != null) {
+                processGit(predicates, student.getFGit(), root, builder);
             }
 
             return builder.and(predicates.toArray(new Predicate[0]));

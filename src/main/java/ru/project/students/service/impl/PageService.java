@@ -18,14 +18,33 @@ public class PageService {
         }
     }
     public Pageable getPageableRandom(StudentPagination pagination){
-        return PageRequest.of(0, pagination.getCount(), Sort.by("function('RANDOM"));
+        return PageRequest.of(0, pagination.getCount(), Sort.by("function('RAND')"));
+    }
+
+    public Pageable getPageable(StudentPagination pagination){
+        if (pagination.getRandom() == null || !pagination.getRandom()){
+            return getPageableSort(pagination);
+        } else {
+            return getPageableRandom(pagination);
+        }
     }
 
     private Sort getSort(StudentPagination pagination){
         String fieldName = pagination.getSort();
         Boolean sortDesc = pagination.getOrderDesc();
 
-        Sort sort = Sort.by(fieldName);
+        Sort sort = null;
+
+        //TODO рефакторинг
+        if (fieldName.equals("contact")){
+            sort = Sort.by("phone")
+                    .and(Sort.by("telegram"))
+                    .and(Sort.by("email"));
+        } else if (fieldName.equals("lastnameInitials")){
+            sort = Sort.by("lastname", "firstname");
+        } else {
+            sort = Sort.by(fieldName);
+        }
 
         if (sortDesc == null || !sortDesc ){
             return sort.ascending();

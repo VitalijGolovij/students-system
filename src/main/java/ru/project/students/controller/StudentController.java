@@ -1,19 +1,14 @@
 package ru.project.students.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import ru.project.students.dto.request.GetStudentListRequest;
-import ru.project.students.dto.request.CreateStudentRequest;
-import ru.project.students.dto.request.PutStudentRequest;
-import ru.project.students.dto.response.StudentActionResponse;
-import ru.project.students.dto.student.StudentSearch;
 import ru.project.students.model.Student;
+import ru.project.students.repository.StudentRepository;
+import ru.project.students.service.StudentFilter;
 import ru.project.students.service.StudentService;
 
-import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -21,6 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
+    private final StudentFilter studentFilter;
+    private final StudentRepository studentRepository;
 
     @PostMapping("/get-student-list")
     public List<Student> getStudentList(@RequestBody GetStudentListRequest getStudentListRequest){
