@@ -1,7 +1,6 @@
-package ru.project.students.dto.request;
+package ru.project.students.dto.response;
 
 import lombok.Getter;
-import ru.project.students.dto.response.ResultResponse;
 
 @Getter
 public class ExceptionResponse extends ResultResponse {

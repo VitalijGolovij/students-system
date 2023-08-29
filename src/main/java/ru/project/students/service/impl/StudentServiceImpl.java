@@ -3,22 +3,22 @@ package ru.project.students.service.impl;
 import lombok.RequiredArgsConstructor;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
 import ru.project.students.dto.student.StudentDto;
 import ru.project.students.dto.student.StudentPagination;
 import ru.project.students.exception.InvalidDataException;
+import ru.project.students.exception.StudentNotFoundException;
 import ru.project.students.model.Student;
 import ru.project.students.repository.StudentRepository;
+import ru.project.students.service.StudentFilter;
 import ru.project.students.service.StudentService;
 import java.util.*;
 
@@ -28,13 +28,28 @@ import java.util.*;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
-    private final StudentConvertor studentConvertor;
+    private final SpecificationService specificationService;
+    private final PageService pageService;
+    private final StudentFilter studentFilter;
 
     @Override
     public List<Student> getStudentList(GetStudentListRequest getStudentListRequest) {
-        StudentPagination pagination = getStudentListRequest.getStudentPagination();
-        Pageable pageable = setPageable(pagination);
-        return studentRepository.findAll(pageable).getContent();
+        StudentDto filter = getStudentListRequest.getFilter();
+        StudentPagination pagination = getStudentListRequest.getPagination();
+
+        Specification<Student> spec = filter == null ? specificationService.emptySpec() :
+                specificationService.getSearchStudentSpecification(filter);
+
+        if (pagination == null){
+            return studentRepository.findAll(spec);
+        }
+        if (pagination.getRandom() != null && pagination.getRandom()){
+            List<Student> studentList = studentRepository.findAll(spec);
+            return randomOf(pagination.getCount(), studentList);
+        }
+        Pageable pageable = pageService.getPageableSort(pagination);
+
+        return studentRepository.findAll(spec, pageable).getContent();
     }
 
     @Transactional
@@ -45,32 +60,35 @@ public class StudentServiceImpl implements StudentService {
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student student = studentConvertor.toStudent(createStudentRequest.getStudent());
+        Student student = createStudentRequest.getStudent();
         studentRepository.save(student);
         return student;
     }
 
     @Override
     public Student getStudent(Long id) {
-        return studentRepository.getStudentsById(id);
+        Optional<Student> student = studentRepository.getStudentsById(id);
+        if (student.isEmpty()){
+            throw new StudentNotFoundException(id);
+        }
+        return student.get();
     }
 
     @Override
     @Transactional
-    public Student putStudent(Long id, StudentDto studentDto,
+    public Student putStudent(Long id, Student student,
                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()){
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student student = getStudent(id);
-        Student updatedStudent = studentConvertor.toStudent(studentDto);
+        Student updatingStudent = getStudent(id);
+        modelMapper.map(student, updatingStudent);
+        updatingStudent.setId(id);
 
-        modelMapper.map(updatedStudent, student);
-        student.setId(id);
+        studentRepository.save(updatingStudent);
 
-        studentRepository.save(student);
-        return student;
+        return updatingStudent;
     }
 
     @Override
@@ -92,20 +110,12 @@ public class StudentServiceImpl implements StudentService {
         return  errorList;
     }
 
-    private Pageable setPageable(StudentPagination pagination){
-        if (pagination.getRandom() == null || !pagination.getRandom()){
-
-            if (pagination.getSort() != null){
-                Sort sort = Sort.by(
-                        pagination.getOrderDesc() ?
-                        Sort.Order.desc(pagination.getSort()) : Sort.Order.asc(pagination.getSort())
-                );
-                return PageRequest.of(pagination.getNumber(), pagination.getCount(), sort);
-            } else {
-                return PageRequest.of(pagination.getNumber(), pagination.getCount());
-            }
+    private List<Student> randomOf(Integer count, List<Student> source){
+        Collections.shuffle(source);
+        if (source.size() < count){
+            return source;
         } else {
-            return PageRequest.of(0, pagination.getCount(), Sort.by("function('RAND')"));
+            return source.subList(0, count);
         }
     }
 }
