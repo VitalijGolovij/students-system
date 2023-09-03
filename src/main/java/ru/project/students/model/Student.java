@@ -28,19 +28,19 @@ public class Student {
     private String email;
     @Column(name = "git")
     private String git;
-    @Column(name = "lastname_initials")
+    @Column(name = "lastname_initials", insertable = false, updatable = false)
     private String lastnameInitials;
-    @Column(name = "contact")
+    @Column(name = "contact", insertable = false, updatable = false)
     private String contact;
-    @Column(name = "has_contact")
+    @Column(name = "has_contact", insertable = false, updatable = false)
     private Boolean hasContact;
-    @Column(name = "has_phone")
+    @Column(name = "has_phone", insertable = false, updatable = false)
     private Boolean hasPhone;
-    @Column(name = "has_telegram")
+    @Column(name = "has_telegram", insertable = false, updatable = false)
     private Boolean hasTelegram;
-    @Column(name = "has_email")
+    @Column(name = "has_email", insertable = false, updatable = false)
     private Boolean hasEmail;
-    @Column(name = "has_git")
+    @Column(name = "has_git", insertable = false, updatable = false)
     private Boolean hasGit;
 
     @Override

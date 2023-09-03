@@ -47,16 +47,16 @@ public class StudentConvertor {
         PersonalData personalData = modelMapper.map(student, PersonalData.class);
         studentDto.setPersonalData(personalData);
 
-        if (student.getHasGit()){
+        if (student.getGit() != null){
             Git git = modelMapper.map(student, Git.class);
             studentDto.setFGit(git);
         }
-        if (student.getHasContact()){
+        if (student.getPhone() != null || student.getEmail() != null || student.getTelegram() != null){
             Contact contact = new Contact();
 
-            contact.setFPhone(student.getHasPhone() ? modelMapper.map(student, Phone.class) : null);
-            contact.setFEmail(student.getHasEmail() ? modelMapper.map(student, Email.class) : null);
-            contact.setFTelegram(student.getHasTelegram() ? modelMapper.map(student, Telegram.class) : null);
+            contact.setFPhone(student.getPhone() != null ? modelMapper.map(student, Phone.class) : null);
+            contact.setFEmail(student.getEmail() != null ? modelMapper.map(student, Email.class) : null);
+            contact.setFTelegram(student.getHasTelegram() != null ? modelMapper.map(student, Telegram.class) : null);
             studentDto.setFContact(contact);
         }
         return studentDto;
