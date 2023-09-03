@@ -1,9 +1,9 @@
 package ru.project.students.dto.student;
 
 import lombok.Data;
-import ru.project.students.model.field.Contact;
-import ru.project.students.model.field.Git;
-import ru.project.students.model.field.PersonalData;
+import ru.project.students.dto.student.field.Contact;
+import ru.project.students.dto.student.field.Git;
+import ru.project.students.dto.student.field.PersonalData;
 
 @Data
 public class UpdatedStudent {
