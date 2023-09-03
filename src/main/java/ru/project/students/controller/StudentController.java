@@ -1,21 +1,18 @@
 package ru.project.students.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
 import ru.project.students.dto.request.PutStudentRequest;
 import ru.project.students.dto.response.StudentActionResponse;
 import ru.project.students.dto.student.StudentDto;
 import ru.project.students.model.Student;
-import ru.project.students.repository.StudentRepository;
-import ru.project.students.service.StudentFilter;
 import ru.project.students.service.StudentService;
-import ru.project.students.service.impl.SpecificationService;
+
 
 import javax.validation.Valid;
 import java.util.Collections;
@@ -26,41 +23,44 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentService studentService;
-    private final StudentFilter studentFilter;
-    private final StudentRepository studentRepository;
-    private final ModelMapper modelMapper;
-    private final SpecificationService specificationService;
+    private final StudentConvertor studentConvertor;
 
     @PostMapping("/get-student-list")
-    public StudentActionResponse getStudentList(@RequestBody GetStudentListRequest getStudentListRequest){
-        //валидировать запрос
-        List<Student> studentList = studentService.getStudentList(getStudentListRequest);
-        return new StudentActionResponse(studentList);
+    public StudentActionResponse getStudentList(@RequestBody GetStudentListRequest request){
+        List<Student> studentList = studentService.getStudentList(request);
+        List<StudentDto> result = studentList.stream()
+                .map(studentConvertor::toStudentDto)
+                .toList();
+        return new StudentActionResponse(result);
     }
 
     @PostMapping
-    public StudentActionResponse createStudent(@RequestBody @Valid CreateStudentRequest createStudentRequest,
+    public StudentActionResponse createStudent(@RequestBody @Valid CreateStudentRequest request,
                                                BindingResult bindingResult){
-        Student savedStudent = studentService.createStudent(createStudentRequest, bindingResult);
-        return new StudentActionResponse(Collections.singletonList(savedStudent));
+        Student savedStudent = studentService.createStudent(request, bindingResult);
+        StudentDto studentDto = studentConvertor.toStudentDto(savedStudent);
+        return new StudentActionResponse(Collections.singletonList(studentDto));
     }
 
     @GetMapping("/{id}")
     public StudentActionResponse getStudent(@PathVariable Long id){
         Student student = studentService.getStudent(id);
-        return new StudentActionResponse(Collections.singletonList(student));
+        StudentDto studentDto = studentConvertor.toStudentDto(student);
+        return new StudentActionResponse(Collections.singletonList(studentDto));
     }
 
     @PutMapping("/{id}")
     public StudentActionResponse putStudent(@PathVariable Long id, @RequestBody @Valid PutStudentRequest request,
                                             BindingResult bindingResult){
-        Student updatedStudent = studentService.putStudent(id, request.getStudent(), bindingResult);
-        return new StudentActionResponse(Collections.singletonList(updatedStudent));
+        Student updatedStudent = studentService.putStudent(id, request, bindingResult);
+        StudentDto studentDto = studentConvertor.toStudentDto(updatedStudent);
+        return new StudentActionResponse(Collections.singletonList(studentDto));
     }
 
     @DeleteMapping("/{id}")
     public StudentActionResponse deleteStudent(@PathVariable Long id){
         Student deletedStudent = studentService.deleteStudent(id);
-        return new StudentActionResponse(Collections.singletonList(deletedStudent));
+        StudentDto studentDto = studentConvertor.toStudentDto(deletedStudent);
+        return new StudentActionResponse(Collections.singletonList(studentDto));
     }
 }

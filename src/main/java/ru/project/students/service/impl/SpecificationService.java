@@ -3,8 +3,8 @@ package ru.project.students.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import ru.project.students.dto.student.field.*;
 import ru.project.students.model.Student;
-import ru.project.students.model.field.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;

@@ -4,21 +4,23 @@ import lombok.RequiredArgsConstructor;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
+import ru.project.students.dto.request.PutStudentRequest;
 import ru.project.students.dto.student.StudentDto;
 import ru.project.students.dto.student.StudentPagination;
 import ru.project.students.exception.InvalidDataException;
 import ru.project.students.exception.StudentNotFoundException;
 import ru.project.students.model.Student;
 import ru.project.students.repository.StudentRepository;
-import ru.project.students.service.StudentFilter;
+import ru.project.students.service.PageService;
+import ru.project.students.service.StudentFilterService;
 import ru.project.students.service.StudentService;
 import java.util.*;
 
@@ -28,28 +30,26 @@ import java.util.*;
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
-    private final SpecificationService specificationService;
-    private final PageService pageService;
-    private final StudentFilter studentFilter;
+    private final PageService pageServiceImpl;
+    private final StudentFilterService studentFilterImpl;
+    private final StudentConvertor studentConvertor;
 
     @Override
     public List<Student> getStudentList(GetStudentListRequest getStudentListRequest) {
-        StudentDto filter = getStudentListRequest.getFilter();
+        StudentDto filterDto = getStudentListRequest.getFilter();
         StudentPagination pagination = getStudentListRequest.getPagination();
 
-        Specification<Student> spec = filter == null ? specificationService.emptySpec() :
-                specificationService.getSearchStudentSpecification(filter);
+        Student studentExample = studentConvertor.toStudent(filterDto);
+        Example<Student> example = studentFilterImpl.getExample(studentExample);
 
-        if (pagination == null){
-            return studentRepository.findAll(spec);
+        if (pagination != null) {
+            if (pagination.getRandom() != null && pagination.getRandom()) {
+                return getRandomList(example, pagination);
+            }
         }
-        if (pagination.getRandom() != null && pagination.getRandom()){
-            List<Student> studentList = studentRepository.findAll(spec);
-            return randomOf(pagination.getCount(), studentList);
-        }
-        Pageable pageable = pageService.getPageableSort(pagination);
+        Pageable pageable = pageServiceImpl.getPageable(pagination);
 
-        return studentRepository.findAll(spec, pageable).getContent();
+        return studentRepository.findAll(example, pageable).getContent();
     }
 
     @Transactional
@@ -60,7 +60,8 @@ public class StudentServiceImpl implements StudentService {
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student student = createStudentRequest.getStudent();
+        StudentDto studentDto = createStudentRequest.getStudent();
+        Student student = studentConvertor.toStudent(studentDto);
         studentRepository.save(student);
         return student;
     }
@@ -76,16 +77,18 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
-    public Student putStudent(Long id, Student student,
+    public Student putStudent(Long id, PutStudentRequest request,
                               BindingResult bindingResult) {
         if (bindingResult.hasErrors()){
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
         Student updatingStudent = getStudent(id);
-        modelMapper.map(student, updatingStudent);
-        updatingStudent.setId(id);
+        StudentDto updatedStudentDto = request.getStudent();
+        Student updatedStudent = studentConvertor.toStudent(updatedStudentDto);
 
+        modelMapper.map(updatedStudent, updatingStudent);
+        updatingStudent.setId(id);
         studentRepository.save(updatingStudent);
 
         return updatingStudent;
@@ -97,6 +100,13 @@ public class StudentServiceImpl implements StudentService {
         Student student = getStudent(id);
         studentRepository.delete(student);
         return student;
+    }
+
+    private List<Student> getRandomList(Example<Student> example, StudentPagination pagination){
+        Pageable pageable = Pageable.unpaged();
+        List<Student> result = studentRepository.findAll(example, pageable).getContent();
+        result = randomOf(pagination.getCount(), result);
+        return result;
     }
 
     private List<Map<String, String>> processValidErrors(BindingResult bindingResult){
@@ -111,11 +121,12 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private List<Student> randomOf(Integer count, List<Student> source){
-        Collections.shuffle(source);
-        if (source.size() < count){
-            return source;
+        List<Student> tmpList = new ArrayList<>(source);
+        Collections.shuffle(tmpList);
+        if (tmpList.size() <= count){
+            return tmpList;
         } else {
-            return source.subList(0, count);
+            return tmpList.subList(0, count);
         }
     }
 }
