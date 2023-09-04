@@ -11,20 +11,17 @@ import javax.validation.Valid;
 
 @Data
 @Embeddable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Contact {
     @Valid
     @Embedded
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Phone fPhone;
     @Valid
     @Embedded
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Telegram fTelegram;
     @Valid
     @Embedded
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Email fEmail;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean hasContact;
 }
