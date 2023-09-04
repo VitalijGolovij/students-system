@@ -56,7 +56,7 @@ public class StudentConvertor {
 
             contact.setFPhone(student.getPhone() != null ? modelMapper.map(student, Phone.class) : null);
             contact.setFEmail(student.getEmail() != null ? modelMapper.map(student, Email.class) : null);
-            contact.setFTelegram(student.getHasTelegram() != null ? modelMapper.map(student, Telegram.class) : null);
+            contact.setFTelegram(student.getTelegram() != null ? modelMapper.map(student, Telegram.class) : null);
             studentDto.setFContact(contact);
         }
         return studentDto;
