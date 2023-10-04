@@ -36,6 +36,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<Student> getStudentList(GetStudentListRequest getStudentListRequest) {
+        if (getStudentListRequest == null)
+            return studentRepository.findAll();
+
         StudentDto filterDto = getStudentListRequest.getFilter();
         StudentPagination pagination = getStudentListRequest.getPagination();
 

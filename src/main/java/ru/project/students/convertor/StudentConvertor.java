@@ -44,6 +44,8 @@ public class StudentConvertor {
 
         StudentDto studentDto = new StudentDto();
 
+        studentDto.setId(student.getId());
+
         PersonalData personalData = modelMapper.map(student, PersonalData.class);
         studentDto.setPersonalData(personalData);
 

@@ -15,6 +15,7 @@ import java.util.Objects;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StudentDto {
+    private Long id;
     @Embedded @Valid
     private Contact fContact;
     @Embedded @Valid

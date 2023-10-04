@@ -1,6 +1,7 @@
 package ru.project.students.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class StudentController {
     private final StudentConvertor studentConvertor;
 
     @PostMapping("/get-student-list")
-    public StudentActionResponse getStudentList(@RequestBody GetStudentListRequest request){
+    public StudentActionResponse getStudentList(@RequestBody @Nullable GetStudentListRequest request){
         List<Student> studentList = studentService.getStudentList(request);
         List<StudentDto> result = studentList.stream()
                 .map(studentConvertor::toStudentDto)
