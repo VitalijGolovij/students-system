@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
+import ru.project.students.dto.request.GetStudentCountRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
 import ru.project.students.dto.request.PutStudentRequest;
 import ru.project.students.dto.student.StudentDto;
@@ -103,6 +104,17 @@ public class StudentServiceImpl implements StudentService {
         Student student = getStudent(id);
         studentRepository.delete(student);
         return student;
+    }
+
+    @Override
+    public long getStudentCount(GetStudentCountRequest request) {
+        if (request == null){
+            return studentRepository.count();
+        }
+        GetStudentListRequest studentListRequest = GetStudentListRequest.builder()
+                .filter(request.getFilter())
+                .build();
+        return getStudentList(studentListRequest).size();
     }
 
     private List<Student> getRandomList(Example<Student> example, StudentPagination pagination){

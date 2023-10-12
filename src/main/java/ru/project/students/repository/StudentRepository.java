@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpecificationExecutor<Student> {
     public Optional<Student> getStudentsById(Long id);
-
-
+    long count();
 }

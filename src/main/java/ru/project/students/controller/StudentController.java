@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.*;
 
 import ru.project.students.convertor.StudentConvertor;
 import ru.project.students.dto.request.CreateStudentRequest;
+import ru.project.students.dto.request.GetStudentCountRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
 import ru.project.students.dto.request.PutStudentRequest;
+import ru.project.students.dto.response.GetStudentCountResponse;
+import ru.project.students.dto.response.ResultResponse;
 import ru.project.students.dto.response.StudentActionResponse;
 import ru.project.students.dto.student.StudentDto;
 import ru.project.students.model.Student;
@@ -33,6 +36,12 @@ public class StudentController {
                 .map(studentConvertor::toStudentDto)
                 .toList();
         return new StudentActionResponse(result);
+    }
+
+    @PostMapping("/get-student-count")
+    public ResultResponse getStudentCount(@RequestBody @Nullable GetStudentCountRequest request){
+        long count = studentService.getStudentCount(request);
+        return new GetStudentCountResponse(count);
     }
 
     @PostMapping

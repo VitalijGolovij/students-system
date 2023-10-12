@@ -2,6 +2,7 @@ package ru.project.students.service;
 
 import org.springframework.validation.BindingResult;
 import ru.project.students.dto.request.CreateStudentRequest;
+import ru.project.students.dto.request.GetStudentCountRequest;
 import ru.project.students.dto.request.GetStudentListRequest;
 import ru.project.students.dto.request.PutStudentRequest;
 import ru.project.students.dto.student.StudentDto;
@@ -15,4 +16,5 @@ public interface StudentService {
     public Student getStudent(Long id);
     public Student putStudent(Long id, PutStudentRequest request, BindingResult bindingResult);
     public Student deleteStudent(Long id);
+    public long getStudentCount(GetStudentCountRequest request);
 }
