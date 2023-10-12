@@ -62,7 +62,8 @@ public class StudentController {
     @PutMapping("/{id}")
     public StudentActionResponse putStudent(@PathVariable Long id, @RequestBody @Valid PutStudentRequest request,
                                             BindingResult bindingResult){
-        Student updatedStudent = studentService.putStudent(id, request, bindingResult);
+        studentService.putStudent(id, request, bindingResult);
+        Student updatedStudent = studentService.getStudent(id);
         StudentDto studentDto = studentConvertor.toStudentDto(updatedStudent);
         return new StudentActionResponse(Collections.singletonList(studentDto));
     }

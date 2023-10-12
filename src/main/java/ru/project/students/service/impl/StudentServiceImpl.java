@@ -87,15 +87,11 @@ public class StudentServiceImpl implements StudentService {
             List<Map<String,String>> errorList = processValidErrors(bindingResult);
             throw new InvalidDataException(errorList);
         }
-        Student updatingStudent = getStudent(id);
+
         StudentDto updatedStudentDto = request.getStudent();
         Student updatedStudent = studentConvertor.toStudent(updatedStudentDto);
-
-        modelMapper.map(updatedStudent, updatingStudent);
-        updatingStudent.setId(id);
-        studentRepository.save(updatingStudent);
-
-        return updatingStudent;
+        updatedStudent.setId(id);
+        return studentRepository.save(updatedStudent);
     }
 
     @Override
