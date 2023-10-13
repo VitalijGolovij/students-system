@@ -30,6 +30,7 @@ public class StudentController {
     private final StudentConvertor studentConvertor;
 
     @PostMapping("/get-student-list")
+    @CrossOrigin
     public StudentActionResponse getStudentList(@RequestBody @Nullable GetStudentListRequest request){
         List<Student> studentList = studentService.getStudentList(request);
         List<StudentDto> result = studentList.stream()
@@ -39,12 +40,14 @@ public class StudentController {
     }
 
     @PostMapping("/get-student-count")
+    @CrossOrigin
     public ResultResponse getStudentCount(@RequestBody @Nullable GetStudentCountRequest request){
         long count = studentService.getStudentCount(request);
         return new GetStudentCountResponse(count);
     }
 
     @PostMapping
+    @CrossOrigin
     public StudentActionResponse createStudent(@RequestBody @Valid CreateStudentRequest request,
                                                BindingResult bindingResult){
         Student savedStudent = studentService.createStudent(request, bindingResult);
@@ -53,6 +56,7 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
+    @CrossOrigin
     public StudentActionResponse getStudent(@PathVariable Long id){
         Student student = studentService.getStudent(id);
         StudentDto studentDto = studentConvertor.toStudentDto(student);
@@ -60,6 +64,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
+    @CrossOrigin
     public StudentActionResponse putStudent(@PathVariable Long id, @RequestBody @Valid PutStudentRequest request,
                                             BindingResult bindingResult){
         studentService.putStudent(id, request, bindingResult);
@@ -69,6 +74,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
+    @CrossOrigin
     public StudentActionResponse deleteStudent(@PathVariable Long id){
         Student deletedStudent = studentService.deleteStudent(id);
         StudentDto studentDto = studentConvertor.toStudentDto(deletedStudent);
