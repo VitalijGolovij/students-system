@@ -49,18 +49,19 @@ public class StudentConvertor {
         PersonalData personalData = modelMapper.map(student, PersonalData.class);
         studentDto.setPersonalData(personalData);
 
-        if (student.getGit() != null){
-            Git git = modelMapper.map(student, Git.class);
-            studentDto.setFGit(git);
-        }
-        if (student.getPhone() != null || student.getEmail() != null || student.getTelegram() != null){
-            Contact contact = new Contact();
+        Git git = modelMapper.map(student, Git.class);
+        studentDto.setFGit(git);
 
-            contact.setFPhone(student.getPhone() != null ? modelMapper.map(student, Phone.class) : null);
-            contact.setFEmail(student.getEmail() != null ? modelMapper.map(student, Email.class) : null);
-            contact.setFTelegram(student.getTelegram() != null ? modelMapper.map(student, Telegram.class) : null);
-            studentDto.setFContact(contact);
+        Contact contact = new Contact();
+        contact.setHasContact(false);
+
+        if (student.getPhone() != null || student.getEmail() != null || student.getTelegram() != null){
+            contact.setHasContact(true);
+            contact.setFPhone(modelMapper.map(student, Phone.class));
+            contact.setFEmail(modelMapper.map(student, Email.class));
+            contact.setFTelegram(modelMapper.map(student, Telegram.class));
         }
+        studentDto.setFContact(contact);
         return studentDto;
     }
 }
